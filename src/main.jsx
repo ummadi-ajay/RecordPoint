@@ -10,7 +10,7 @@ import { ToastProvider } from './context/ToastContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/RecordPoint">
       <ThemeProvider>
         <OnlineProvider>
           <ToastProvider>
