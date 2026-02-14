@@ -124,7 +124,7 @@ const WhatsAppTemplates = ({ isOpen, onClose, invoice = null, student = null }) 
             '{{period}}': invoice ? formatPeriod(invoice) : 'Month Year',
             '{{class_count}}': invoice?.classCount || '0',
             '{{amount}}': invoice?.totalAmount?.toLocaleString() || '0',
-            '{{invoice_link}}': invoice ? `${window.location.origin}/invoice/${invoice.id}` : 'https://example.com',
+            '{{invoice_link}}': invoice ? `${window.location.origin}${window.location.pathname}#/invoice/${invoice.id}` : 'https://example.com',
             '{{course}}': invoice?.studentSnapshot?.course || student?.course || 'Beginner',
             '{{total_classes}}': '0',
             '{{weekday}}': 'Saturday',

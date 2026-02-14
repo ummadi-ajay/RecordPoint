@@ -300,7 +300,7 @@ const Invoices = () => {
 
     const shareOnWhatsApp = (inv) => {
         const phone = inv.studentSnapshot?.phone?.replace(/\D/g, '');
-        const link = `${window.location.origin}/invoice/${inv.id}`;
+        const link = `${window.location.origin}${window.location.pathname}#/invoice/${inv.id}`;
         const period = formatPeriod(inv);
         const message = `Hello ${inv.studentSnapshot?.parentName}!\n\nHere is the invoice from Makerworks Lab for ${inv.studentSnapshot?.name}:\n\n📄 Invoice: #${inv.id.slice(-8).toUpperCase()}\n📅 Period: ${period}\n📚 Classes: ${inv.classCount}\n💰 Amount: ₹${inv.totalAmount?.toLocaleString()}\n\n🔗 View Invoice: ${link}\n\nThank you!`;
         window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -309,7 +309,7 @@ const Invoices = () => {
     const sendPaymentNudge = (inv) => {
         const phone = inv.studentSnapshot?.phone?.replace(/\D/g, '');
         const period = formatPeriod(inv);
-        const message = `Hi ${inv.studentSnapshot?.parentName}!\n\nJust a friendly reminder regarding the invoice for ${inv.studentSnapshot?.name} (${period}).\n\n💰 Amount Due: ₹${inv.totalAmount?.toLocaleString()}\n📄 Invoice: #${inv.id.slice(-8).toUpperCase()}\n\nYou can view and pay it here: ${window.location.origin}/invoice/${inv.id}\n\nThank you!`;
+        const message = `Hi ${inv.studentSnapshot?.parentName}!\n\nJust a friendly reminder regarding the invoice for ${inv.studentSnapshot?.name} (${period}).\n\n💰 Amount Due: ₹${inv.totalAmount?.toLocaleString()}\n📄 Invoice: #${inv.id.slice(-8).toUpperCase()}\n\nYou can view and pay it here: ${window.location.origin}${window.location.pathname}#/invoice/${inv.id}\n\nThank you!`;
         window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         toast.info('Payment nudge created!');
     };
@@ -531,7 +531,7 @@ const Invoices = () => {
     };
 
     const copyLink = (id) => {
-        const link = `${window.location.origin}/invoice/${id}`;
+        const link = `${window.location.origin}${window.location.pathname}#/invoice/${id}`;
         navigator.clipboard.writeText(link);
         setCopyingId(id);
         toast.success('Invoice link copied to clipboard!');
@@ -707,7 +707,7 @@ const Invoices = () => {
                                                 <button onClick={() => openEditModal(inv)} className="action-btn" title="Edit Everything">
                                                     <Edit3 size={18} />
                                                 </button>
-                                                <button onClick={() => window.open(`/invoice/${inv.id}`, '_blank')} className="action-btn" title="View">
+                                                <button onClick={() => window.open(`${window.location.origin}${window.location.pathname}#/invoice/${inv.id}`, '_blank')} className="action-btn" title="View">
                                                     <Eye size={18} />
                                                 </button>
                                                 <button onClick={() => copyLink(inv.id)} className="action-btn" title="Copy Link">
@@ -763,7 +763,7 @@ const Invoices = () => {
                                     </div>
 
                                     <div className="card-actions">
-                                        <button onClick={() => window.open(`/invoice/${inv.id}`, '_blank')} className="card-action-btn primary">
+                                        <button onClick={() => window.open(`${window.location.origin}${window.location.pathname}#/invoice/${inv.id}`, '_blank')} className="card-action-btn primary">
                                             <Eye size={16} /> View
                                         </button>
                                         <button onClick={() => openEditModal(inv)} className="card-action-btn">
