@@ -18,8 +18,9 @@ import { db } from '../lib/firebase';
 import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths, addMonths, getDay } from 'date-fns';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RePieChart, Pie, Cell } from 'recharts';
+import { AnalyticsSkeleton } from '../components/Skeleton';
 
-const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 const Analytics = () => {
     const [loading, setLoading] = useState(true);
@@ -163,10 +164,7 @@ const Analytics = () => {
             </div>
 
             {loading ? (
-                <div className="loader-full">
-                    <Loader2 className="animate-spin" size={48} style={{ color: '#4f46e5' }} />
-                    <p>Loading analytics...</p>
-                </div>
+                <AnalyticsSkeleton />
             ) : (
                 <>
                     {/* Summary Cards */}
@@ -215,8 +213,8 @@ const Analytics = () => {
                                     <AreaChart data={data.monthlyStats}>
                                         <defs>
                                             <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                                             </linearGradient>
                                             <linearGradient id="colorPaid" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -230,7 +228,7 @@ const Analytics = () => {
                                             formatter={(value, name) => [`₹${value.toLocaleString()}`, name === 'revenue' ? 'Total' : 'Paid']}
                                             contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}
                                         />
-                                        <Area type="monotone" dataKey="revenue" stroke="#4f46e5" fillOpacity={1} fill="url(#colorRev)" strokeWidth={2} name="revenue" />
+                                        <Area type="monotone" dataKey="revenue" stroke="#2563eb" fillOpacity={1} fill="url(#colorRev)" strokeWidth={2} name="revenue" />
                                         <Area type="monotone" dataKey="paid" stroke="#10b981" fillOpacity={1} fill="url(#colorPaid)" strokeWidth={2} name="paid" />
                                     </AreaChart>
                                 </ResponsiveContainer>
@@ -448,7 +446,7 @@ const Analytics = () => {
           justify-content: center;
         }
 
-        .summary-card.revenue .card-icon { background: #f0f4ff; color: #4f46e5; }
+        .summary-card.revenue .card-icon { background: #f0f4ff; color: #2563eb; }
         .summary-card.students .card-icon { background: #ecfdf5; color: #10b981; }
         .summary-card.classes .card-icon { background: #fef3c7; color: #f59e0b; }
         .summary-card.invoices .card-icon { background: #fef2f2; color: #ef4444; }

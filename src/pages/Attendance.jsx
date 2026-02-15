@@ -27,6 +27,7 @@ import {
 import { db } from '../lib/firebase';
 import { format, addMonths, subMonths } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AttendanceSkeleton } from '../components/Skeleton';
 
 // Course pricing
 const COURSE_PRICING = {
@@ -261,10 +262,7 @@ const Attendance = () => {
             {/* Student List */}
             <div className="glass card student-list-card">
                 {loading ? (
-                    <div className="loader-box">
-                        <Loader2 className="animate-spin text-primary" size={40} />
-                        <p>Loading...</p>
-                    </div>
+                    <AttendanceSkeleton />
                 ) : students.length > 0 ? (
                     <div className="student-rows">
                         {students.map(student => {

@@ -45,7 +45,7 @@ export const fireConfetti = () => {
 export const fireSideCannons = () => {
     const end = Date.now() + 1000;
 
-    const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'];
+    const colors = ['#2563eb', '#10b981', '#f59e0b', '#ec4899'];
 
     (function frame() {
         confetti({

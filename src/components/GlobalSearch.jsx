@@ -369,7 +369,7 @@ const GlobalSearch = () => {
           overflow: hidden;
         }
 
-        .result-icon.action { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
+        .result-icon.action { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
         .result-icon.student { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
         .result-icon.invoice { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 

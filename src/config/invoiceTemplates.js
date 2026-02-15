@@ -60,7 +60,7 @@ export const INVOICE_TEMPLATES = [
     styles: {
       headerBg: '#0f172a',
       headerColor: '#f1f5f9',
-      accentColor: '#6366f1',
+      accentColor: '#3b82f6',
       borderRadius: '12px',
       fontFamily: "'Outfit', sans-serif",
     }

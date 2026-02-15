@@ -29,6 +29,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 import { exportAllData, importData } from '../utils/backup';
 import { INVOICE_TEMPLATES } from '../config/invoiceTemplates';
+import { SettingsSkeleton } from '../components/Skeleton';
 
 const Settings = () => {
     const { isDark, toggleTheme } = useTheme();
@@ -221,12 +222,7 @@ const Settings = () => {
     };
 
     if (loading) {
-        return (
-            <div className="loader-full">
-                <Loader2 className="animate-spin" size={48} style={{ color: 'var(--primary)' }} />
-                <p>Loading settings...</p>
-            </div>
-        );
+        return <SettingsSkeleton />;
     }
 
     return (
@@ -816,7 +812,7 @@ const Settings = () => {
             grid-template-columns: 2fr 1fr 40px;
             gap: 10px;
             padding: 10px;
-            background: rgba(79, 70, 229, 0.05); /* varying primary tint */
+            background: rgba(37, 99, 235, 0.05); /* varying primary tint */
             border-radius: 10px;
             align-items: center;
         }
@@ -853,7 +849,7 @@ const Settings = () => {
 
         .theme-option.active {
           border-color: var(--primary);
-          background: ${isDark ? 'rgba(99, 102, 241, 0.15)' : '#f0f4ff'};
+          background: ${isDark ? 'rgba(59, 130, 246, 0.15)' : '#f0f4ff'};
           color: var(--primary);
         }
 
@@ -967,7 +963,7 @@ const Settings = () => {
 
         .template-card.active {
           border-color: var(--primary);
-          background: ${isDark ? 'rgba(99, 102, 241, 0.15)' : '#f0f4ff'};
+          background: ${isDark ? 'rgba(59, 130, 246, 0.15)' : '#f0f4ff'};
         }
 
         .template-preview { font-size: 1.8rem; }

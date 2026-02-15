@@ -3,18 +3,15 @@ import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import {
-  Download,
   Printer,
   Loader2,
   MessageCircle,
   Clock,
-  CheckCircle,
-  FileText
+  CheckCircle
 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import html2pdf from 'html2pdf.js';
 
 import { INSTITUTE_DETAILS } from '../config/institute';
 
@@ -41,7 +38,6 @@ const PublicInvoice = () => {
   const [labDetails, setLabDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const invoiceRef = useRef(null);
 
   useEffect(() => {
@@ -117,26 +113,6 @@ const PublicInvoice = () => {
 
   const handlePrint = () => window.print();
 
-  const handleDownloadPDF = async () => {
-    setDownloading(true);
-    try {
-      const element = invoiceRef.current;
-      const opt = {
-        margin: 5,
-        filename: `Invoice_${invoiceId.slice(-6).toUpperCase()}_${student.name}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      await html2pdf().set(opt).from(element).save();
-    } catch (err) {
-      console.error(err);
-      alert('PDF generation failed.');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   const shareOnWhatsApp = () => {
     const message = `Invoice for ${student.name}: ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
@@ -154,10 +130,6 @@ const PublicInvoice = () => {
           <div className="actions">
             <button onClick={shareOnWhatsApp} className="btn-wa"><MessageCircle size={18} /> Share</button>
             <button onClick={handlePrint} className="btn-sec"><Printer size={18} /> Print</button>
-            <button onClick={handleDownloadPDF} disabled={downloading} className="btn-pri">
-              {downloading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-              {downloading ? 'Please wait...' : 'Download PDF'}
-            </button>
           </div>
         </div>
       </div>
@@ -250,11 +222,11 @@ const PublicInvoice = () => {
             <div className="bank-card">
               <h4 className="footer-title">Bank Details</h4>
               <div className="bank-grid">
-                <span>Account Name</span> <span className="strong">{labDetails?.bank?.accountName}</span>
-                <span>Account Number</span> <span className="strong">{labDetails?.bank?.accountNumber}</span>
-                <span>IFSC</span> <span className="strong">{labDetails?.bank?.ifsc}</span>
-                <span>Account Type</span> <span>{labDetails?.bank?.accountType}</span>
-                <span>Bank</span> <span>{labDetails?.bank?.bankName}</span>
+                <span className="label">Account Name</span> <span className="value strong">{labDetails?.bank?.accountName}</span>
+                <span className="label">Account Number</span> <span className="value strong">{labDetails?.bank?.accountNumber}</span>
+                <span className="label">IFSC</span> <span className="value strong">{labDetails?.bank?.ifsc}</span>
+                <span className="label">Account Type</span> <span className="value">{labDetails?.bank?.accountType}</span>
+                <span className="label">Bank</span> <span className="value">{labDetails?.bank?.bankName}</span>
               </div>
             </div>
           </div>
@@ -262,7 +234,6 @@ const PublicInvoice = () => {
           <div className="footer-mid">
             <div className="upi-box">
               <span className="upi-label">Scan to pay via UPI</span>
-              <span className="upi-hint">Maximum of 1 lakh can be transferred via upi in a single day</span>
               <div className="qr-container">
                 <QRCodeSVG
                   value={`upi://pay?pa=${labDetails?.upiId}&pn=${labDetails?.name}&am=${invoice.totalAmount}&cu=INR`}
@@ -270,25 +241,36 @@ const PublicInvoice = () => {
                 />
               </div>
               <span className="upi-id">{labDetails?.upiId}</span>
+              <span className="upi-hint">Maximum of 1 lakh can be transferred via upi in a single day</span>
             </div>
           </div>
 
           <div className="footer-right">
-            <div className="total-block">
-              <div className="total-row main">
-                <span>Total (INR)</span>
-                <span className="amount">₹{invoice.totalAmount?.toLocaleString()}.00</span>
+            <div className="summary-block">
+              <div className="total-row">
+                <span className="total-label">Sub Total</span>
+                <span className="total-value">₹{(invoice.totalAmount - (invoice.adjustment || 0)).toLocaleString()}.00</span>
               </div>
+              {invoice.adjustment !== 0 && (
+                <div className="total-row adjustment">
+                  <span className="total-label">{invoice.adjLabel || (invoice.adjustment > 0 ? 'Additional Fee' : 'Discount')}</span>
+                  <span className="total-value">{invoice.adjustment > 0 ? '+' : ''}{invoice.adjustment?.toLocaleString()}.00</span>
+                </div>
+              )}
+              <div className="total-row main-total">
+                <span className="total-label">Total (INR)</span>
+                <span className="total-value">₹{invoice.totalAmount?.toLocaleString()}.00</span>
+              </div>
+            </div>
+
+            <div className="words-box">
+              <span className="words-label">Total in words:</span>
+              <span className="words-value">{numberToWords(invoice.totalAmount)}</span>
             </div>
 
             <div className="sig-section">
               <div className="sig-line"></div>
-              <span>Authorised Signatory</span>
-            </div>
-
-            <div className="words-box">
-              <strong>Total (in words) : </strong>
-              <span>{numberToWords(invoice.totalAmount)}</span>
+              <span className="sig-text">Authorised Signatory</span>
             </div>
           </div>
         </div>
@@ -297,8 +279,8 @@ const PublicInvoice = () => {
       <style jsx="true">{`
         .page-container {
           min-height: 100vh;
-          background: #f1f5f9;
-          padding: 80px 20px 40px;
+          background: #f8fafc;
+          padding: 100px 15px 60px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -310,213 +292,363 @@ const PublicInvoice = () => {
           top: 0;
           left: 0;
           right: 0;
-          height: 64px;
-          background: white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          height: auto;
+          min-height: 70px;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 1px 10px rgba(0,0,0,0.05);
           z-index: 100;
           display: flex;
           align-items: center;
           justify-content: center;
+          padding: 10px 0;
         }
 
         .bar-inner {
           width: 100%;
-          max-width: 900px;
+          max-width: 1000px;
           padding: 0 20px;
           display: flex;
+          flex-wrap: wrap;
           justify-content: space-between;
           align-items: center;
+          gap: 15px;
         }
 
         .status-pill {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 6px 16px;
+          gap: 8px;
+          padding: 8px 18px;
           border-radius: 99px;
           font-weight: 700;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
+          letter-spacing: 0.5px;
+          white-space: nowrap;
         }
-        .status-pill.paid { background: #dcfce7; color: #15803d; }
-        .status-pill.unpaid { background: #fee2e2; color: #b91c1c; }
+        .status-pill.paid { background: #dcfce7; color: #166534; }
+        .status-pill.unpaid { background: #fee2e2; color: #991b1b; }
 
-        .actions { display: flex; gap: 12px; }
-        .btn-pri { background: #f97316; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .btn-sec { background: white; border: 1px solid #e2e8f0; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .btn-wa { background: #25d366; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .actions { 
+          display: flex; 
+          gap: 10px; 
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .btn-pri, .btn-sec, .btn-wa { 
+          padding: 10px 18px; 
+          border-radius: 10px; 
+          font-weight: 600; 
+          cursor: pointer; 
+          display: flex; 
+          align-items: center; 
+          gap: 8px; 
+          transition: all 0.2s;
+          font-size: 0.9rem;
+          border: none;
+        }
+        .btn-pri { background: #f97316; color: white; }
+        .btn-pri:hover { background: #ea580c; transform: translateY(-1px); }
+        .btn-sec { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-sec:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-wa { background: #22c55e; color: white; }
+        .btn-wa:hover { background: #16a34a; transform: translateY(-1px); }
 
         .invoice-paper {
           width: 100%;
-          max-width: 900px;
+          max-width: 210mm;
+          min-height: 297mm;
           background: white;
-          padding: 50px;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+          padding: 15mm;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.08);
           position: relative;
-          color: #374151;
+          color: #1e293b;
+          margin-bottom: 40px;
+          box-sizing: border-box;
+          overflow: hidden;
         }
 
         .doc-header {
           display: flex;
           justify-content: space-between;
+          align-items: flex-start;
           margin-bottom: 40px;
+          border-bottom: 2px solid #f97316;
+          padding-bottom: 30px;
+          gap: 20px;
+        }
+
+        .header-left { 
+          flex: 1; 
+        }
+
+        .header-right {
+          flex-shrink: 0;
         }
 
         .main-title {
-          font-size: 2.2rem;
+          font-size: clamp(1.5rem, 4vw, 2.2rem);
           color: #f97316;
           margin: 0 0 20px;
-          font-weight: 400;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          line-height: 1.2;
         }
 
         .meta-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 15px 30px;
         }
 
-        .meta-item { display: flex; gap: 10px; font-size: 1.1rem; }
-        .meta-item .label { color: #6b7280; width: 120px; }
-        .meta-item .strong { font-weight: 700; color: #111827; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-item .label { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .meta-item .value { font-size: 1rem; font-weight: 600; color: #0f172a; }
+        .meta-item .strong { color: #f97316; font-size: 1.2rem; }
 
         .logo-box {
           text-align: right;
-          background: black;
+          background: #0f172a;
           color: white;
           padding: 15px 25px;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           min-width: 180px;
+          flex-shrink: 0;
         }
 
-        .logo-main { 
-          font-size: 2.8rem; 
-          font-weight: 900; 
-          line-height: 0.9; 
-          letter-spacing: -1px;
-        }
-        
-        .logo-sub { 
-          font-size: 2.8rem; 
-          font-weight: 900; 
-          line-height: 0.9; 
-          letter-spacing: -1px;
-          margin-bottom: 5px;
-        }
-        .logo-tag { font-size: 0.6rem; letter-spacing: 0.1em; color: #9ca3af; border-top: 1px solid #374151; padding-top: 5px; }
+        .logo-main { font-size: 2.2rem; font-weight: 900; line-height: 0.8; letter-spacing: -1.5px; }
+        .logo-sub { font-size: 2.2rem; font-weight: 900; line-height: 0.8; letter-spacing: -1.5px; margin-bottom: 8px; color: #f97316; }
+        .logo-tag { font-size: 0.6rem; letter-spacing: 1.5px; color: #94a3b8; border-top: 1px solid #334155; padding-top: 6px; width: 100%; text-align: center; }
 
         .address-section {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 30px;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
           margin-bottom: 40px;
         }
 
         .address-box {
-          background: #fff7ed;
-          border-radius: 8px;
-          padding: 24px;
+          background: #f8fafc;
+          border-radius: 12px;
+          padding: 20px;
+          border: 1px solid #e2e8f0;
         }
 
         .box-title {
           color: #f97316;
-          margin: 0 0 15px;
-          font-size: 1.5rem;
-          font-weight: 500;
+          margin: 0 0 12px;
+          font-size: 1.1rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .box-content { font-size: 0.95rem; line-height: 1.6; }
+        .box-content { font-size: 0.95rem; line-height: 1.6; color: #334155; }
+        .box-content strong { color: #0f172a; }
         .box-content p { margin: 2px 0; }
 
+        .table-container { margin-bottom: 40px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .items-table {
           width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 40px;
+          min-width: 600px;
+          border-collapse: separate;
+          border-spacing: 0;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
         }
 
         .items-table th {
-          background: #f97316;
+          background: #0f172a;
           color: white;
-          padding: 12px 15px;
+          padding: 14px;
           text-align: left;
-          font-size: 1.1rem;
-          font-weight: 500;
+          font-size: 0.85rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .items-table td {
-          padding: 20px 15px;
-          border-bottom: 1px solid #f97316;
-          background: #fffafa;
+          padding: 16px;
+          border-bottom: 1px solid #f1f5f9;
+          font-size: 0.95rem;
         }
 
-        .item-name { font-size: 1.1rem; font-weight: 500; margin-bottom: 8px; }
-        .item-desc { font-size: 0.9rem; color: #6b7280; }
+        .item-name { font-weight: 700; color: #0f172a; margin-bottom: 4px; font-size: 1rem; }
+        .item-desc { font-size: 0.85rem; color: #64748b; font-style: italic; }
 
         .doc-footer {
-          display: flex;
-          gap: 20px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 25px;
+          align-items: start;
         }
-
-        .footer-left { flex: 1.2; }
-        .footer-mid { flex: 0.8; display: flex; justify-content: center; }
-        .footer-right { flex: 1.5; text-align: right; }
 
         .bank-card {
           background: #fff7ed;
           padding: 20px;
-          border-radius: 8px;
+          border-radius: 12px;
+          border: 1px solid #ffedd5;
         }
 
-        .footer-title { color: #f97316; margin: 0 0 15px; font-size: 1.1rem; }
+        .footer-title { color: #c2410c; margin: 0 0 15px; font-size: 0.95rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         
         .bank-grid {
           display: grid;
-          grid-template-columns: 120px 1fr;
-          gap: 5px 10px;
-          font-size: 0.9rem;
+          grid-template-columns: auto 1fr;
+          gap: 8px 12px;
+          font-size: 0.85rem;
         }
+        .bank-grid .label { color: #9a3412; font-weight: 600; }
+        .bank-grid .value { color: #1e293b; }
 
         .upi-box {
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
+          background: white;
+          padding: 15px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
         }
 
-        .upi-label { color: #f97316; font-size: 0.9rem; margin-bottom: 4px; }
-        .upi-hint { font-size: 0.65rem; color: #6b7280; max-width: 140px; margin-bottom: 10px; }
-        .qr-container { padding: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; }
-        .upi-id { font-size: 0.9rem; font-weight: 500; }
+        .upi-label { color: #0f172a; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
+        .qr-container { padding: 10px; background: white; border: 1.5px solid #f1f5f9; border-radius: 10px; margin-bottom: 10px; }
+        .upi-id { font-size: 0.95rem; font-weight: 700; color: #f97316; margin-bottom: 6px; }
+        .upi-hint { font-size: 0.65rem; color: #64748b; line-height: 1.4; max-width: 180px; }
 
-        .total-block {
-          border-top: 2px solid black;
-          border-bottom: 2px solid black;
-          padding: 15px 0;
-          margin-bottom: 30px;
+        .summary-block {
+          background: #0f172a;
+          color: white;
+          padding: 20px;
+          border-radius: 12px;
+          margin-bottom: 20px;
         }
 
-        .total-row { display: flex; justify-content: space-between; font-size: 1.4rem; font-weight: 700; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .total-row.main-total { border-top: 1px solid #334155; padding-top: 12px; margin-top: 12px; }
         
-        .sig-section {
+        .total-label { font-size: 0.85rem; color: #94a3b8; font-weight: 500; }
+        .total-value { font-size: 1rem; font-weight: 600; }
+        .main-total .total-label { font-size: 1.1rem; color: white; font-weight: 800; }
+        .main-total .total-value { font-size: 1.6rem; color: #f97316; font-weight: 900; }
+
+        .words-box {
           margin-bottom: 30px;
+          text-align: right;
+          padding: 0 5px;
+        }
+        .words-label { display: block; font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+        .words-value { font-size: 0.85rem; color: #1e293b; font-weight: 700; font-style: italic; line-height: 1.4; }
+
+        .sig-section {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
+          margin-top: 45px;
+          text-align: right;
+        }
+        .sig-line { width: 220px; border-bottom: 2px solid #0f172a; margin-bottom: 8px; }
+        .sig-text { font-size: 0.85rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        @media screen and (max-width: 768px) {
+          .page-container { padding-top: 140px; }
+          .invoice-paper { padding: 8mm; margin-bottom: 20px; }
+          .meta-grid { grid-template-columns: 1fr 1fr; }
+          .logo-box { order: -1; width: 100%; text-align: center; align-items: center; }
+          .doc-header { flex-direction: column; align-items: flex-start; }
+          .doc-footer { grid-template-columns: 1fr; }
+          .header-right { width: 100%; }
         }
 
-        .sig-line { width: 250px; border-bottom: 1px solid black; margin-bottom: 8px; }
-        .sig-section span { font-size: 0.9rem; color: #374151; font-weight: 500; }
-
-        .words-box {
-          font-size: 0.85rem;
-          line-height: 1.4;
-          text-transform: uppercase;
+        @media screen and (max-width: 480px) {
+          .meta-grid { grid-template-columns: 1fr; }
+          .main-title { font-size: 1.4rem; }
+          .actions .btn-pri, .actions .btn-sec, .actions .btn-wa { padding: 8px 12px; font-size: 0.8rem; }
+          .status-pill { font-size: 0.8rem; padding: 6px 12px; }
         }
 
         @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          body {
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .no-print { display: none !important; }
-          .page-container { padding: 0; background: white; }
-          .invoice-paper { box-shadow: none; max-width: none; padding: 20px; width: 210mm; min-height: 297mm; }
+          .page-container { 
+            padding: 0 !important; 
+            background: white !important; 
+            display: block !important;
+            min-height: auto !important;
+          }
+          .invoice-paper { 
+            box-shadow: none !important; 
+            margin: 0 !important; 
+            width: 210mm !important; 
+            height: 297mm !important; 
+            padding: 10mm 12mm !important;
+            box-sizing: border-box !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+            display: block !important;
+            overflow: hidden !important;
+          }
+          .doc-header { 
+            margin-bottom: 20px !important; 
+            padding-bottom: 20px !important; 
+            gap: 20px !important;
+          }
+          .main-title { font-size: 1.8rem !important; margin-bottom: 10px !important; }
+          .logo-box { padding: 12px 24px !important; min-width: 150px !important; }
+          .logo-main, .logo-sub { font-size: 2rem !important; }
+          
+          .address-section { 
+            display: grid !important; 
+            grid-template-columns: 1fr 1fr !important; 
+            margin-bottom: 25px !important;
+            gap: 20px !important;
+          }
+          .address-box { padding: 15px 18px !important; }
+          .box-title { font-size: 1rem !important; margin-bottom: 10px !important; }
+          .box-content { font-size: 0.9rem !important; }
+
+          .table-container { margin-bottom: 25px !important; }
+          .items-table th { padding: 12px !important; font-size: 0.8rem !important; }
+          .items-table td { padding: 15px 12px !important; font-size: 0.9rem !important; }
+          .item-name { font-size: 1rem !important; }
+
+          .doc-footer { 
+            display: grid !important; 
+            grid-template-columns: 1.1fr 0.9fr 1.5fr !important; 
+            margin-top: 0 !important; 
+            gap: 20px !important;
+            padding-top: 15px !important;
+          }
+          .bank-card { padding: 15px !important; }
+          .summary-block { padding: 15px !important; margin-bottom: 10px !important; }
+          .main-total .total-value { font-size: 1.4rem !important; }
+          .upi-box { padding: 10px !important; }
+          .qr-container { padding: 8px !important; margin-bottom: 5px !important; }
+          .qr-container svg { width: 80px !important; height: 80px !important; }
+          
+          .words-box { margin-bottom: 20px !important; text-align: right !important; }
+          .words-value { font-size: 0.75rem !important; }
+          .sig-section { 
+            margin-top: 45px !important; 
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            text-align: right !important;
+          }
+          .sig-line { width: 220px !important; }
         }
       `}</style>
     </motion.div>

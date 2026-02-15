@@ -35,6 +35,7 @@ import { collection, getDocs, doc, getDoc, addDoc, deleteDoc, query, orderBy, wh
 import { db } from '../lib/firebase';
 import { format, subMonths, isSameMonth } from 'date-fns';
 import { motion } from 'framer-motion';
+import { InsightsSkeleton } from '../components/Skeleton';
 
 const Insights = () => {
     const [loading, setLoading] = useState(true);
@@ -323,10 +324,7 @@ const Insights = () => {
                     <button className="retry-btn" onClick={fetchInsights}>Retry</button>
                 </div>
             ) : loading ? (
-                <div className="loader-box">
-                    <Loader2 className="animate-spin text-primary" size={48} />
-                    <p>Analyzing data...</p>
-                </div>
+                <InsightsSkeleton />
             ) : (
                 <div className="insights-grid">
                     {/* Top Cards */}

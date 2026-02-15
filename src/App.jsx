@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
+import './App.css';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import NotFound from './pages/NotFound';
 
 // Page components
 import Dashboard from './pages/Dashboard';
@@ -31,9 +33,11 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
+
+      {/* 404 Catch-all */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
 
 export default App;
-

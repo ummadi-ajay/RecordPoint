@@ -37,6 +37,7 @@ import { saveAs } from 'file-saver';
 import { fireConfetti, fireSideCannons } from '../utils/confetti';
 import { useToast } from '../context/ToastContext';
 import WhatsAppTemplates from '../components/WhatsAppTemplates';
+import { InvoiceTableSkeleton, SkeletonStyles } from '../components/Skeleton';
 
 const MONTH_OPTIONS = [
     { value: 1, label: '1 Month' },
@@ -632,10 +633,10 @@ const Invoices = () => {
 
             <div className="glass card table-container">
                 {loading ? (
-                    <div className="loader-box">
-                        <Loader2 className="animate-spin text-primary" size={40} />
-                        <p>Loading invoices...</p>
-                    </div>
+                    <>
+                        <SkeletonStyles />
+                        <InvoiceTableSkeleton />
+                    </>
                 ) : filteredInvoices.length > 0 ? (
                     <>
                         <table className="modern-table desktop-only">
@@ -1442,14 +1443,14 @@ const Invoices = () => {
           border-radius: 4px;
           text-transform: uppercase;
         }
-        .type-tag.invoice { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
+        .type-tag.invoice { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
         .type-tag.quotation { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
 
         .inv-code {
           font-family: monospace;
           font-weight: 700;
           color: var(--primary);
-          background: rgba(79, 70, 229, 0.1);
+          background: rgba(37, 99, 235, 0.1);
           padding: 4px 8px;
           border-radius: 6px;
           font-size: 0.85rem;
@@ -1474,7 +1475,7 @@ const Invoices = () => {
         .period-badge { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
 
         .multi-badge {
-          background: rgba(79, 70, 229, 0.1);
+          background: rgba(37, 99, 235, 0.1);
           color: var(--primary);
           padding: 2px 6px;
           border-radius: 4px;
@@ -1598,7 +1599,7 @@ const Invoices = () => {
         }
         .type-opt:hover { border-color: var(--primary); color: var(--primary); }
         .type-opt.active { 
-          background: rgba(79, 70, 229, 0.1); 
+          background: rgba(37, 99, 235, 0.1); 
           border-color: var(--primary); 
           color: var(--primary); 
         }
@@ -1663,7 +1664,7 @@ const Invoices = () => {
 
         .student-chip.selected {
           border-color: var(--primary);
-          background: rgba(79, 70, 229, 0.1);
+          background: rgba(37, 99, 235, 0.1);
         }
 
         .chip-avatar {

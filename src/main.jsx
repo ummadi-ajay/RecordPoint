@@ -8,6 +8,13 @@ import { ThemeProvider } from './context/ThemeContext'
 import { OnlineProvider } from './context/OnlineContext'
 import { ToastProvider } from './context/ToastContext'
 
+// Dismiss the HTML preloader
+const preloader = document.getElementById('preloader');
+if (preloader) {
+  preloader.classList.add('hide');
+  setTimeout(() => preloader.remove(), 500);
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HashRouter>
