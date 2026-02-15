@@ -5,19 +5,191 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#4f46e5" />
+  <meta name="theme-color" content="#2563eb" />
   <meta name="description"
     content="EduBill - Professional student billing and attendance management system for education centers" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json" />
   <title>EduBill - Student Billing System</title>
-  <script type="module" crossorigin src="./assets/index-oeJT2FRg.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CWJAc2tS.css">
+  <script type="module" crossorigin src="./assets/index-DGyr0gor.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C8b2q0w_.css">
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Instant preloader (pure CSS, no JS needed) -->
+    <div id="preloader">
+      <style>
+        #preloader {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #f0f2f5;
+          font-family: 'Outfit', -apple-system, sans-serif;
+          transition: opacity 0.4s, visibility 0.4s;
+        }
+
+        [data-theme="dark"] #preloader {
+          background: #0b0f19;
+        }
+
+        #preloader.hide {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
+
+        .pl-logo {
+          width: 72px;
+          height: 72px;
+          border-radius: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 800;
+          font-size: 1.5rem;
+          box-shadow: 0 8px 32px rgba(37, 99, 235, 0.35);
+          animation: plPulse 2s ease-in-out infinite;
+          position: relative;
+        }
+
+        .pl-logo svg {
+          width: 32px;
+          height: 32px;
+          fill: none;
+          stroke: white;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        @keyframes plPulse {
+
+          0%,
+          100% {
+            transform: scale(1);
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.35);
+          }
+
+          50% {
+            transform: scale(1.06);
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.5);
+          }
+        }
+
+        .pl-orbit {
+          position: absolute;
+          width: 110px;
+          height: 110px;
+          animation: plSpin 3s linear infinite;
+        }
+
+        .pl-orbit::before,
+        .pl-orbit::after {
+          content: '';
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #60a5fa;
+        }
+
+        .pl-orbit::before {
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        .pl-orbit::after {
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #93c5fd;
+        }
+
+        @keyframes plSpin {
+          from {
+            transform: rotate(0deg);
+          }
+
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .pl-brand {
+          margin-top: 24px;
+          font-size: 1.4rem;
+          font-weight: 800;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: -0.02em;
+        }
+
+        .pl-sub {
+          margin-top: 6px;
+          font-size: 0.8rem;
+          color: #94a3b8;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+        }
+
+        .pl-bar-wrap {
+          margin-top: 28px;
+          width: 160px;
+          height: 4px;
+          background: rgba(37, 99, 235, 0.12);
+          border-radius: 4px;
+          overflow: hidden;
+        }
+
+        .pl-bar {
+          width: 40%;
+          height: 100%;
+          border-radius: 4px;
+          background: linear-gradient(90deg, #2563eb, #3b82f6, #2563eb);
+          background-size: 200% 100%;
+          animation: plBar 1.2s ease-in-out infinite;
+        }
+
+        @keyframes plBar {
+          0% {
+            transform: translateX(-100%);
+          }
+
+          100% {
+            transform: translateX(350%);
+          }
+        }
+      </style>
+      <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+        <div class="pl-orbit"></div>
+        <div class="pl-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+        </div>
+      </div>
+      <div class="pl-brand">EduBill</div>
+      <div class="pl-sub">Loading your workspace...</div>
+      <div class="pl-bar-wrap">
+        <div class="pl-bar"></div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
